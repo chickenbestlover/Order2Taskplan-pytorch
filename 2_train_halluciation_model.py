@@ -142,7 +142,7 @@ try:
         f1_scores['none'].append(f1_score_none)
         f1_scores['hall'].append(f1_score_hall)
 
-        log.info('|Epoch {:3d}| train MSE loss {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f}| elapsed: {:3f} |'.format(
+        log.info('|Epoch {:3d}| train MSE loss {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f}| elapsed: {:3.0f} |'.format(
             epoch, loss, ppl_test_hall, f1_score_hall, exact_match_hall, elapsed_time))
 
 

@@ -16,7 +16,7 @@ from tools.plot import savePlot
 print('PyTorch Version: ',torch.__version__)
 
 parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
-parser.add_argument('--resume','-r',default=False,
+parser.add_argument('--resume','-r',default=True,
                     help='use checkpoint model parameters as initial parameters (default: False)',
                     action="store_true")
 parser.add_argument('--pretrained','-p',
@@ -98,7 +98,7 @@ for i,j in zip(pairs_maxlen['train'],pairs_maxlen['test']):
 
 if args.resume:
     log.info('[loading previous model...]')
-    checkpoint = torch.load('checkpoint/best_model.pt')
+    checkpoint = torch.load('checkpoint/best_model/best_model.pt')
     args = checkpoint['config']
     state_dict = checkpoint['state_dict']
     epoch_0 = checkpoint['epoch'] + 1
@@ -127,7 +127,7 @@ try:
         elapsed_time = time.time() - start_time
         ppl_trains.append(ppl_train), ppl_tests.append(ppl_test)
         exact_matches.append(exact_match), f1_scores.append(f1_score)
-        log.info('|Epoch {:3d}| train ppl {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f}| elapsed: {:3f} |'.format(
+        log.info('|Epoch {:3d}| train ppl {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f}| elapsed: {:3.0f} |'.format(
             epoch, ppl_train, ppl_test, f1_score, exact_match, elapsed_time))
 
 
