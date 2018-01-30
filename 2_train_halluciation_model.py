@@ -86,9 +86,9 @@ glove= vocab.GloVe(name='6B', dim=300)
 print('Loaded', len(glove.itos), 'words')
 
 pairs = {}
-langs, _ = NLPTools.prepare_data('order', 'environment','taskplan-whole', embedding=glove)
-_, pairs['train'] = NLPTools.prepare_data('order', 'environment', 'taskplan-train', embedding=glove)
-_, pairs['test'] = NLPTools.prepare_data('order','environment','taskplan-test', embedding=glove)
+langs, _ = NLPTools.prepare_data('data/order-environment-taskplan-whole', embedding=glove)
+_, pairs['train'] = NLPTools.prepare_data('data/order-environment-taskplan-train', embedding=glove)
+_, pairs['test'] = NLPTools.prepare_data('data/order-environment-taskplan-test', embedding=glove)
 
 # Print an example pair
 dataset={}

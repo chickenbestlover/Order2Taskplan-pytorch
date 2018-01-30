@@ -11,8 +11,8 @@ EOS_token = 2
 
 
 class Lang:
-    def __init__(self, name, embedding):
-        self.name = name
+    def __init__(self, embedding):
+
         if embedding is None:
             self.stoi = {"PAD":PAD_token, "SOS":SOS_token, "EOS":EOS_token}
             self.itos = {PAD_token:"PAD", SOS_token:"SOS", EOS_token:"EOS"} # Only used for decoding
@@ -54,18 +54,18 @@ def normalize_string(s):
 
     return s
 
-def read_langs(lang1, lang2, lang3,embedding=None):
+def read_langs(filename,embedding=None):
     print("Reading lines...")
 
     # Read the file and split into lines
-    lines = open('../data/%s-%s-%s.txt' % (lang1, lang2, lang3)).read().strip().split('\n')
+    lines = open(filename).read().strip().split('\n')
 
     # Split every line into pairs and normalize
     pairs = [[normalize_string(s) for s in l.split('\t')] for l in lines]
 
-    input_lang1 = Lang(lang1, embedding=embedding)
-    input_lang2 = Lang(lang2, embedding=embedding)
-    output_lang = Lang(lang3, embedding=None)
+    input_lang1 = Lang(embedding=embedding)
+    input_lang2 = Lang(embedding=embedding)
+    output_lang = Lang(embedding=None)
 
     return input_lang1, input_lang2, output_lang, pairs
 
@@ -101,8 +101,8 @@ def filter_pairs(pairs):
     return pairs
 
 
-def prepare_data(lang1_name, lang2_name, lang3_name, embedding=None):
-    input_lang1, input_lang2, output_lang, pairs = read_langs(lang1_name, lang2_name, lang3_name,embedding=embedding)
+def prepare_data(filename, embedding=None):
+    input_lang1, input_lang2, output_lang, pairs = read_langs(filename,embedding=embedding)
     print("Read %s sentence pairs" % len(pairs))
 
     pairs = filter_pairs(pairs)
