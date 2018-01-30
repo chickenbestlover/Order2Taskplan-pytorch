@@ -1,6 +1,6 @@
 from matplotlib import pyplot as plt
 
-def savePlot(ppl_trains,ppl_tests,EMs,F1s):
+def savePlot(args,ppl_trains,ppl_tests,EMs,F1):
 
     plt.figure(figsize=(12,6))
     plt.subplot(1,2,1)
@@ -23,9 +23,9 @@ def savePlot(ppl_trains,ppl_tests,EMs,F1s):
     plt.xlabel('Epoch')
     plt.ylabel('Score')
     plt.legend()
-    plt.savefig('result/scores_.pdf')
+    plt.savefig(args.plot_file)
 
-def savePlot_hall(loss_trains,ppl_tests,EMs,F1s):
+def savePlot_hall(args,loss_trains,ppl_tests,EMs,F1s):
 
     plt.figure(figsize=(18,6))
     plt.subplot(2,2,1)
@@ -73,5 +73,5 @@ def savePlot_hall(loss_trains,ppl_tests,EMs,F1s):
     plt.ylabel('F1 score')
     plt.legend()
 
-    plt.savefig('result/scores_.pdf')
+    plt.savefig(args.plot_file)
 

@@ -1,13 +1,12 @@
-import torch
-from seq2seq import seq2seq
-from seq2seq import halluciation_net
-from halluciation import halluciationEncoder
-import torch.optim as optim
-from torch.autograd import Variable
-from criterion import masked_cross_entropy
+import logging
 import math
 from collections import Counter
-import logging
+
+import torch
+import torch.optim as optim
+from order2taskplan.criterion import masked_cross_entropy
+from order2taskplan.seq2seq import seq2seq
+from torch.autograd import Variable
 
 logger = logging.getLogger(__name__)
 

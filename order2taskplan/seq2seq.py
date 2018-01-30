@@ -1,6 +1,8 @@
-import torch
 import torch.nn as nn
-import layers
+
+from order2taskplan import layers
+
+
 class seq2seq(nn.Module):
     def __init__(self, args, input_embedding, output_lang, max_seqlen, padding_idx=0):
         super(seq2seq,self).__init__()
@@ -159,12 +161,12 @@ class halluciation_net(nn.Module):
         '''
         decoder_input_size = args.hidden_size*2
         self.rnn_decoder = layers.AttentionRNNDecoder_hall(input_size=decoder_input_size,
-                                                      hidden_size=args.hidden_size,
-                                                      num_layers=args.num_layers,
-                                                      max_seqlen=max_seqlen,
-                                                      dropout_rate=0,
-                                                      dropout_output=False,
-                                                      packing=False)
+                                                           hidden_size=args.hidden_size,
+                                                           num_layers=args.num_layers,
+                                                           max_seqlen=max_seqlen,
+                                                           dropout_rate=0,
+                                                           dropout_output=False,
+                                                           packing=False)
 
 
     def forward(self, x2_emb, x2_mask):

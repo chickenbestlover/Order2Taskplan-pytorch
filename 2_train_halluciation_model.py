@@ -1,29 +1,18 @@
-import unicodedata
-import sys
-import os
 import importlib
+import sys
+
 importlib.reload(sys)
 #sys.setdefaultencoding('utf8')
-import string
-import re
-import random
 import argparse
 import torch
-import torch.nn as nn
-from torch.autograd import Variable
-from torch import optim
-import torch.nn.functional as F
 import torchtext.vocab as vocab
-import math
-import numpy as np
-import shutil
-import NLPTools
-from torch.utils.data import DataLoader, Dataset
-from model import order2taskplanModel
+from tools import NLPTools
+from torch.utils.data import DataLoader
+from order2taskplan.model import order2taskplanModel
 import time
 from shutil import copyfile
 import logging
-from plot import savePlot_hall
+from tools.plot import savePlot_hall
 print('PyTorch Version: ',torch.__version__)
 
 parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
@@ -59,8 +48,10 @@ parser.add_argument('--packing', default=False, type=bool,
                     help='packing padded rnn sequence')
 parser.add_argument('--teacher_forcing_ratio', default=0.5, type=float,
                     help='teacher forcing ratio in decoding process')
-parser.add_argument('--log_file', default='result_hall.log',
+parser.add_argument('--log_file', default='result/2_result_hall.log',
                     help='log_file name to be saved')
+parser.add_argument('--plot_file', default='result/2_scores_hall.log',
+                    help='plot_file name to be saved')
 parser.add_argument('--model_file', default='checkpoint/checkpoint.pt',
                     help='model_file to be saved')
 args = parser.parse_args()
@@ -86,9 +77,9 @@ glove= vocab.GloVe(name='6B', dim=300)
 print('Loaded', len(glove.itos), 'words')
 
 pairs = {}
-langs, _ = NLPTools.prepare_data('data/order-environment-taskplan-whole', embedding=glove)
-_, pairs['train'] = NLPTools.prepare_data('data/order-environment-taskplan-train', embedding=glove)
-_, pairs['test'] = NLPTools.prepare_data('data/order-environment-taskplan-test', embedding=glove)
+langs, _ = NLPTools.prepare_data('data/order-environment-taskplan-whole.txt', embedding=glove)
+_, pairs['train'] = NLPTools.prepare_data('data/order-environment-taskplan-train.txt', embedding=glove)
+_, pairs['test'] = NLPTools.prepare_data('data/order-environment-taskplan-test.txt', embedding=glove)
 
 # Print an example pair
 dataset={}
@@ -162,7 +153,7 @@ try:
                 args.model_file,'checkpoint/best_model/best_model.pt')
             log.info('[new best model saved.]')
 
-        savePlot_hall(loss_trains, ppl_tests, exact_matches, f1_scores)
+        savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
 
 
 
