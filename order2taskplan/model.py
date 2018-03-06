@@ -8,7 +8,7 @@ from order2taskplan.criterion import masked_cross_entropy
 from order2taskplan.seqs2seq import seqs2seq
 from order2taskplan.seq2seq import seq2seq
 from torch.autograd import Variable
-
+import pathlib
 logger = logging.getLogger(__name__)
 
 
@@ -217,6 +217,7 @@ class order2taskplanModel(object):
             'epoch': epoch
         }
         try:
+            pathlib.Path('checkpoint/best_model').mkdir(parents=True, exist_ok=True)
             torch.save(params, filename)
             logger.info('model saved to {}'.format(filename))
         except BaseException:
@@ -365,6 +366,7 @@ class taskplan2taskplanModel(object):
             'epoch': epoch
         }
         try:
+            pathlib.Path('checkpoint/best_model').mkdir(parents=True, exist_ok=True)
             torch.save(params, filename)
             logger.info('model saved to {}'.format(filename))
         except BaseException:

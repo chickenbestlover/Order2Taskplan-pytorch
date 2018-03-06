@@ -12,6 +12,8 @@ from order2taskplan.model import taskplan2taskplanModel
 import time
 from shutil import copyfile
 import logging
+import pathlib
+
 from tools.plot import savePlot_hall
 print('PyTorch Version: ',torch.__version__)
 
@@ -139,6 +141,7 @@ try:
         model.save(args.model_file,epoch)
         if f1_score > best_val_score:
             best_val_score = f1_score
+            pathlib.Path('checkpoint/best_model/').mkdir(parents=True, exist_ok=True)
             copyfile(
                 args.model_file,'checkpoint/best_model/3_best_model.pt')
             log.info('[new best model saved.]')
