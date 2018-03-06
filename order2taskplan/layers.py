@@ -145,10 +145,10 @@ class StackedBRNN(nn.Module):
         return output
 
 
-class AttentionRNNDecoder(nn.Module):
+class AttentionRNNDecoder_double(nn.Module):
     def __init__(self, input_size, hidden_size, embedding_dim, num_layers, max_seqlen, lang,
                  padding_idx=0, dropout_rate=0, dropout_output=False, packing=False,teacher_forcing_ratio=0.5):
-        super(AttentionRNNDecoder, self).__init__()
+        super(AttentionRNNDecoder_double, self).__init__()
 
         self.max_seqlen = max_seqlen
         self.teacher_forcing_ratio = teacher_forcing_ratio
@@ -162,10 +162,10 @@ class AttentionRNNDecoder(nn.Module):
                                        packing=packing)
 
         self.input1_attn = attn_Bahdanau(max_seqlen=max_seqlen[0],
-                                         rnn_hidden_size=2 * hidden_size,
+                                         rnn_hidden_size= hidden_size,
                                          embedding_dim=embedding_dim)
         self.input2_attn = attn_Bahdanau(max_seqlen=max_seqlen[1],
-                                         rnn_hidden_size=2 * hidden_size,
+                                         rnn_hidden_size= hidden_size,
                                          embedding_dim=embedding_dim)
         self.embedding = nn.Embedding(num_embeddings=len(lang.stoi),
                                       embedding_dim=embedding_dim,
@@ -177,7 +177,8 @@ class AttentionRNNDecoder(nn.Module):
         # generate initial word embedding (SOS token)
         batch_size = encoder1_hiddens.size(0)
         x = Variable(torch.zeros(batch_size,1).fill_(self.lang.stoi['SOS']).long()).cuda()
-        hidden = None
+        #hidden = None
+        hidden = self.rnn.init_hidden(batch_size=batch_size)
         outputs = [] # output vectors
         outputs_indices = [] # output indices
 
@@ -189,12 +190,12 @@ class AttentionRNNDecoder(nn.Module):
             #print('x_emb:',x_emb.size())
             # generate attention-applied hidden states for both encoders
             encoder1_attn_scores = self.input1_attn.forward(input = x_emb.squeeze(1),
-                                                          hidden = encoder1_hiddens[:,0],
+                                                          hidden = hidden[0][0],
                                                           mask = x1_mask)
             encoder1_attn_hidden = torch.bmm(encoder1_attn_scores.unsqueeze(1),encoder1_hiddens).squeeze(1)
 
             encoder2_attn_scores = self.input2_attn.forward(input = x_emb.squeeze(1),
-                                                          hidden = encoder2_hiddens[:,0],
+                                                          hidden = hidden[0][0],
                                                           mask = x2_mask)
             encoder2_attn_hidden = torch.bmm(encoder2_attn_scores.unsqueeze(1),encoder2_hiddens).squeeze(1)
             #print('encoder1_attn_hidden:',encoder1_attn_hidden.size())
@@ -232,7 +233,7 @@ class AttentionRNNDecoder_hall(nn.Module):
         super(AttentionRNNDecoder_hall, self).__init__()
 
         self.max_seqlen = max_seqlen
-
+        self.hidden_size = hidden_size
         self.rnn = StackedLSTM(input_size=input_size,
                                        hidden_size=hidden_size,
                                        num_layers=num_layers,
@@ -240,21 +241,23 @@ class AttentionRNNDecoder_hall(nn.Module):
                                        dropout_output=dropout_output,
                                        packing=packing)
         self.input2_attn = attn_Bahdanau(max_seqlen=max_seqlen[1],
-                                         rnn_hidden_size=2 * hidden_size,
-                                         embedding_dim=0)
+                                         rnn_hidden_size=hidden_size,
+                                         embedding_dim=hidden_size*2)
         self.linear = nn.Linear(in_features=hidden_size,out_features=hidden_size*2)
 
     def forward(self,encoder2_hiddens, x2_mask):
 
         # generate initial word embedding (SOS token)
         batch_size = encoder2_hiddens.size(0)
-        hidden = None
+        #hidden = None
+        hidden = self.rnn.init_hidden(batch_size=batch_size)
         outputs = [] # output vectors
+        output = Variable(torch.FloatTensor(batch_size,self.hidden_size*2).fill_(0)).cuda()
 
         for i in range(self.max_seqlen[0]):
             # generate attention-applied hidden states for both encoders
-            encoder2_attn_scores = self.input2_attn.forward(input = None,
-                                                          hidden = encoder2_hiddens[:,0],
+            encoder2_attn_scores = self.input2_attn.forward(input = output,
+                                                          hidden = hidden[0][0],
                                                           mask = x2_mask)
             encoder2_attn_hidden = torch.bmm(encoder2_attn_scores.unsqueeze(1),encoder2_hiddens).squeeze(1)
             #print('encoder1_attn_hidden:',encoder1_attn_hidden.size())
@@ -273,6 +276,153 @@ class AttentionRNNDecoder_hall(nn.Module):
         #print('outputs:', outputs.size())
 
         return outputs
+
+
+class AttentionRNNDecoder_single(nn.Module):
+    def __init__(self, input_size, hidden_size, embedding_dim, num_layers, max_seqlen, lang,
+                 padding_idx=0, dropout_rate=0, dropout_output=False, packing=False,teacher_forcing_ratio=0.5):
+        super(AttentionRNNDecoder_single, self).__init__()
+
+        self.max_seqlen = max_seqlen
+        self.teacher_forcing_ratio = teacher_forcing_ratio
+        self.lang = lang
+
+        self.rnn = StackedLSTM(input_size=input_size,
+                                       hidden_size=hidden_size,
+                                       num_layers=num_layers,
+                                       dropout_rate=dropout_rate,
+                                       dropout_output=dropout_output,
+                                       packing=packing)
+
+        self.input_attn = attn_Bahdanau(max_seqlen=max_seqlen[2],
+                                        rnn_hidden_size=hidden_size,
+                                        embedding_dim=embedding_dim)
+        self.embedding = nn.Embedding(num_embeddings=len(lang.stoi),
+                                      embedding_dim=embedding_dim,
+                                      padding_idx=padding_idx)
+        self.linear = nn.Linear(in_features=hidden_size,out_features=lang.n_words)
+
+    def forward(self, encoder_hiddens, y_mask, y=None):
+
+        # generate initial word embedding (SOS token)
+        batch_size = encoder_hiddens.size(0)
+        x = Variable(torch.zeros(batch_size,1).fill_(self.lang.stoi['SOS']).long()).cuda()
+        #hidden = None
+        hidden = self.rnn.init_hidden(batch_size=batch_size)
+        outputs = [] # output vectors
+        outputs_indices = [] # output indices
+
+        USE_TEACHER_FORCING = random.random() < self.teacher_forcing_ratio
+        #USE_TEACHER_FORCING = True
+
+        for i in range(self.max_seqlen[2]):
+            x_emb = self.embedding(x)
+            #print('x_emb:',x_emb.size())
+            # generate attention-applied hidden states for both encoders
+            encoder1_attn_scores = self.input_attn.forward(input = x_emb.squeeze(1),
+                                                           hidden =hidden[0][-1],
+                                                           mask = y_mask)
+            encoder1_attn_hidden = torch.bmm(encoder1_attn_scores.unsqueeze(1), encoder_hiddens).squeeze(1)
+            #print('encoder1_attn_hidden:',encoder1_attn_hidden.size())
+            #print('encoder2_attn_hidden:', encoder2_attn_hidden.size())
+            rnn_input = torch.cat([encoder1_attn_hidden,x_emb.squeeze(1)],dim=1)
+            #print('rnn_input:',rnn_input.size())
+            #print(self.rnn)
+            rnn_output, hidden = self.rnn.forward(input=rnn_input,hidden=hidden)
+            #print('rnn_output:', rnn_output.size())
+            output = self.linear.forward(rnn_output)
+            #print('output:', output.size())
+            outputs.append(output.unsqueeze(1))
+            topValue, topIndex = output.data.topk(k=1, dim=1)
+            outputs_indices.append(Variable(topIndex))
+            if self.training and USE_TEACHER_FORCING:
+                # Target becomes the next input
+                #print('target:',y[:,i].unsqueeze(1))
+                x = y[:,i].unsqueeze(1) #Next target is next input
+            else:
+                # Network output becomes the next input
+                #print('topvalue:',topValue)
+                #print('topIndex:',topIndex)
+                x = Variable(topIndex) # [ batch x 1 ]
+
+
+        outputs = torch.cat(outputs, dim=1) # [batch x seq_len x num_classes ]
+        outputs_indices = torch.cat(outputs_indices,dim=1) # [ batch x seq_len ]
+        #print('outputs:', outputs.size())
+
+        return outputs, outputs_indices
+
+class AttentionRNNDiscriminator(nn.Module):
+    def __init__(self, input_size, hidden_size, embedding_dim, num_layers, max_seqlen, lang,
+                 padding_idx=0, dropout_rate=0, dropout_output=False, packing=False,teacher_forcing_ratio=0.5):
+        super(AttentionRNNDiscriminator, self).__init__()
+
+        self.max_seqlen = max_seqlen
+        self.teacher_forcing_ratio = teacher_forcing_ratio
+        self.lang = lang
+
+        self.rnn = StackedLSTM(input_size=input_size,
+                                       hidden_size=hidden_size,
+                                       num_layers=num_layers,
+                                       dropout_rate=dropout_rate,
+                                       dropout_output=dropout_output,
+                                       packing=packing)
+
+        self.input_attn = attn_Bahdanau(max_seqlen=max_seqlen[2],
+                                        rnn_hidden_size=2 * hidden_size,
+                                        embedding_dim=embedding_dim)
+
+        self.linear = nn.Linear(in_features=hidden_size,out_features=lang.n_words)
+
+    def forward(self, encoder_hiddens, y_mask, y=None):
+
+        # generate initial word embedding (SOS token)
+        batch_size = encoder_hiddens.size(0)
+        x = Variable(torch.zeros(batch_size,1).fill_(self.lang.stoi['SOS']).long()).cuda()
+        hidden = None
+        outputs = [] # output vectors
+        outputs_indices = [] # output indices
+
+        USE_TEACHER_FORCING = random.random() < self.teacher_forcing_ratio
+        #USE_TEACHER_FORCING = True
+
+        for i in range(self.max_seqlen[2]):
+            x_emb = self.embedding(x)
+            #print('x_emb:',x_emb.size())
+            # generate attention-applied hidden states for both encoders
+            encoder1_attn_scores = self.input_attn.forward(input = x_emb.squeeze(1),
+                                                           hidden =encoder_hiddens[:, 0],
+                                                           mask = y_mask)
+            encoder1_attn_hidden = torch.bmm(encoder1_attn_scores.unsqueeze(1), encoder_hiddens).squeeze(1)
+            #print('encoder1_attn_hidden:',encoder1_attn_hidden.size())
+            #print('encoder2_attn_hidden:', encoder2_attn_hidden.size())
+            rnn_input = torch.cat([encoder1_attn_hidden,x_emb.squeeze(1)],dim=1)
+            #print('rnn_input:',rnn_input.size())
+            #print(self.rnn)
+            rnn_output, hidden = self.rnn.forward(input=rnn_input,hidden=hidden)
+            #print('rnn_output:', rnn_output.size())
+            output = self.linear.forward(rnn_output)
+            #print('output:', output.size())
+            outputs.append(output.unsqueeze(1))
+            topValue, topIndex = output.data.topk(k=1, dim=1)
+            outputs_indices.append(Variable(topIndex))
+            if self.training and USE_TEACHER_FORCING:
+                # Target becomes the next input
+                #print('target:',y[:,i].unsqueeze(1))
+                x = y[:,i].unsqueeze(1) #Next target is next input
+            else:
+                # Network output becomes the next input
+                #print('topvalue:',topValue)
+                #print('topIndex:',topIndex)
+                x = Variable(topIndex) # [ batch x 1 ]
+
+
+        outputs = torch.cat(outputs, dim=1) # [batch x seq_len x num_classes ]
+        outputs_indices = torch.cat(outputs_indices,dim=1) # [ batch x seq_len ]
+        #print('outputs:', outputs.size())
+
+        return outputs, outputs_indices
+
 
 
 
@@ -318,6 +468,13 @@ class StackedLSTM(nn.Module):
         c_1 = torch.stack(c_1)
 
         return input, (h_1, c_1)
+
+    def init_hidden(self,batch_size):
+        hx = Variable(torch.FloatTensor(self.num_layers*1,batch_size,self.hidden_size).zero_(), requires_grad=True)
+        if next(self.parameters()).is_cuda:
+            hx = hx.cuda()
+        hidden = (hx, hx)
+        return hidden
 
 class attn_Bahdanau(nn.Module):
     def __init__(self, max_seqlen, rnn_hidden_size=300, embedding_dim=300):

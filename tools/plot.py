@@ -1,12 +1,12 @@
 from matplotlib import pyplot as plt
 
-def savePlot(args,ppl_trains,ppl_tests,EMs,F1):
+def savePlot(args,ppl_trains,ppl_tests,EMs,F1s):
 
     plt.figure(figsize=(12,6))
     plt.subplot(1,2,1)
     num_epoch =len(ppl_trains)
-    plt.plot(range(num_epoch),ppl_trains,'r',label='train')
-    plt.plot(range(num_epoch),ppl_tests,'b',label='test')
+    plt.plot(range(num_epoch), ppl_trains,'r',label='train')
+    plt.plot(range(num_epoch), ppl_tests,'b',label='test')
     plt.xlim([-50,400])
     plt.ylim([1,4])
     plt.grid()

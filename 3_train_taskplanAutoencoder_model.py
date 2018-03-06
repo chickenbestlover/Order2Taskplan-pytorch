@@ -8,15 +8,15 @@ import torch
 import torchtext.vocab as vocab
 from tools import NLPTools
 from torch.utils.data import DataLoader
-from order2taskplan.model import order2taskplanModel
+from order2taskplan.model import taskplan2taskplanModel
 import time
 from shutil import copyfile
 import logging
-from tools.plot import savePlot
+from tools.plot import savePlot_hall
 print('PyTorch Version: ',torch.__version__)
 
 parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
-parser.add_argument('--resume','-r',default=False,
+parser.add_argument('--resume','-r',
                     help='use checkpoint model parameters as initial parameters (default: False)',
                     action="store_true")
 parser.add_argument('--pretrained','-p',
@@ -48,11 +48,11 @@ parser.add_argument('--packing', default=False, type=bool,
                     help='packing padded rnn sequence')
 parser.add_argument('--teacher_forcing_ratio', default=0.5, type=float,
                     help='teacher forcing ratio in decoding process')
-parser.add_argument('--log_file', default='result/1_result.log',
+parser.add_argument('--log_file', default='result/3_result.log',
                     help='log_file name to be saved')
-parser.add_argument('--plot_file', default='result/1_scores.pdf',
+parser.add_argument('--plot_file', default='result/3_scores.pdf',
                     help='plot_file name to be saved')
-parser.add_argument('--model_file', default='checkpoint/1_checkpoint.pt',
+parser.add_argument('--model_file', default='checkpoint/3_checkpoint.pt',
                     help='model_file to be saved')
 args = parser.parse_args()
 
@@ -81,7 +81,6 @@ langs, _ = NLPTools.prepare_data('data/order-environment-taskplan-whole.txt', em
 _, pairs['train'] = NLPTools.prepare_data('data/order-environment-taskplan-train.txt', embedding=glove)
 _, pairs['test'] = NLPTools.prepare_data('data/order-environment-taskplan-test.txt', embedding=glove)
 
-# Print an example pair
 dataset={}
 pairs_maxlen={}
 loader={}
@@ -98,47 +97,53 @@ for i,j in zip(pairs_maxlen['train'],pairs_maxlen['test']):
 
 if args.resume:
     log.info('[loading previous model...]')
-    checkpoint = torch.load('checkpoint/best_model/1_best_model.pt')
+    checkpoint = torch.load('checkpoint/best_model/3_best_model.pt')
     args = checkpoint['config']
     state_dict = checkpoint['state_dict']
     epoch_0 = checkpoint['epoch'] + 1
-    model = order2taskplanModel(args=args, loader=loader,
+    model = taskplan2taskplanModel(args=args, loader=loader,
                                 langs=langs, max_seqlen=max_seqlen, embedding=glove, state_dict=state_dict)
     model.cuda()
 
 else:
     epoch_0 =1
-    model = order2taskplanModel(args=args, loader=loader,
+    model = taskplan2taskplanModel(args=args, loader=loader,
                                 langs=langs, max_seqlen=max_seqlen, embedding=glove, state_dict=None)
     model.cuda()
 
 try:
 
     best_val_score = 0.0
-    ppl_trains = []
-    ppl_tests = []
-    exact_matches = []
-    f1_scores = []
+    loss_trains = []
+    ppl_tests, exact_matches, f1_scores = {},{},{}
+    for type in ['normal']:
+        ppl_tests[type] = []
+        exact_matches[type] = []
+        f1_scores[type] = []
 
     for epoch in range(epoch_0,epoch_0 + args.epochs):
         start_time = time.time()
-        ppl_train = model.train()
-        ppl_test,exact_match, f1_score = model.evaluate()
+        loss = model.train()
+        ppl_test, exact_match, f1_score = model.evaluate()
+
         elapsed_time = time.time() - start_time
-        ppl_trains.append(ppl_train), ppl_tests.append(ppl_test)
-        exact_matches.append(exact_match), f1_scores.append(f1_score)
-        log.info('|Epoch {:3d}| train ppl {:5.2f} | valid ppl {:5.2f}, F1 {:3.2f}, EM {:3.2f}| elapsed: {:3.0f} |'.format(
-            epoch, ppl_train, ppl_test, f1_score, exact_match, elapsed_time))
+        loss_trains.append(loss)
+        ppl_tests['normal'].append(ppl_test)
+        exact_matches['normal'].append(exact_match)
+        f1_scores['normal'].append(f1_score)
+
+        log.info('|Epoch {:3d}| train loss {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f} | elapsed: {:3.0f} |'.format(
+            epoch, loss, ppl_test, f1_score, exact_match, elapsed_time))
 
 
         model.save(args.model_file,epoch)
         if f1_score > best_val_score:
             best_val_score = f1_score
             copyfile(
-                args.model_file,'checkpoint/best_model/1_best_model.pt')
+                args.model_file,'checkpoint/best_model/3_best_model.pt')
             log.info('[new best model saved.]')
 
-        savePlot(args,ppl_trains,ppl_tests,exact_matches,f1_scores)
+        #savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
 
 
 
