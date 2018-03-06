@@ -24,6 +24,7 @@ def savePlot(args,ppl_trains,ppl_tests,EMs,F1s):
     plt.ylabel('Score')
     plt.legend()
     plt.savefig(args.plot_file)
+    plt.close()
 
 def savePlot_hall(args,loss_trains,ppl_tests,EMs,F1s):
 
@@ -74,4 +75,4 @@ def savePlot_hall(args,loss_trains,ppl_tests,EMs,F1s):
     plt.legend()
 
     plt.savefig(args.plot_file)
-
+    plt.close()

@@ -146,7 +146,7 @@ try:
                 args.model_file,'checkpoint/best_model/3_best_model.pt')
             log.info('[new best model saved.]')
 
-        #savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
+        savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
 
 
 
