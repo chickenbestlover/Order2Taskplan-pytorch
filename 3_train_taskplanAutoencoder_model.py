@@ -19,12 +19,12 @@ print('PyTorch Version: ',torch.__version__)
 
 parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
 parser.add_argument('--resume','-r',
-                    help='use checkpoint model parameters as initial parameters (default: False)',
+                    help='use checkpoint model parameters as initial parameters (default: False)', default=True,
                     action="store_true")
 parser.add_argument('--pretrained','-p',
                     help='use checkpoint model parameters and do not train anymore (default: False)',
                     action="store_true")
-parser.add_argument('--epochs', default=400, type=int, metavar='E',
+parser.add_argument('--epochs', default=200, type=int, metavar='E',
                     help='number of total epochs to run')
 parser.add_argument('--start_epoch', default=1, type=int, metavar='SE',
                     help='manual epoch number (useful on restarts)')
