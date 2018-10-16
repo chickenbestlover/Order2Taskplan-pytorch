@@ -3,6 +3,17 @@
 This is a PyTorch implementation of the Episodic memory module described in our IROS 2018 paper ["Adaptive Task Planner for Performing Home Service Tasks in Cooperation with a Human"](http://rit.kaist.ac.kr/home/International_Conference?action=AttachFile&do=get&target=paper_0417.pdf).
 Please note that this repository contains only the implementation of the episodic memory module(the deep learning part) in the paper.
 
+### Input
+* A perceived object list:
+  * An object in the list can be expressed in multiple words in natual language
+* User command(order):
+  * Natural language instruction or order that an user gives to a robot.(optional)
+
+### Output
+* A robot behavior sequence(taskplan) with _n_ behaviors:
+  * subject_1 verb_1 object_1  subject_2 verb_2 object_2 ... subject_n verb_n object_n
+  * subject_t = object_t if verb_t deals with only one object.
+
 ![concept](./fig/order2taskplan_concept.png)
 
 ## Dataset
