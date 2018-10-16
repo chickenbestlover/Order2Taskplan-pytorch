@@ -64,7 +64,7 @@ CUDA_VISIBLE_DEVICES=0 python 2_train_hallucination_model.py
 
 * This video was presented at IROS 2018.
 
-<iframe width="1472" height="554" src="https://www.youtube.com/embed/EqNj-pxk6-A" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+<iframe width="560" height="315" src="https://www.youtube.com/embed/EqNj-pxk6-A" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
 
 
 ## Citation
