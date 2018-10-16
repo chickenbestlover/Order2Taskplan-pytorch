@@ -119,8 +119,10 @@ else:
     exact_matches = []
     f1_scores = []
 
-test_input = pairs['test'][0]
 
+
+Print()
+test_input = pairs['test'][3]
 print('Order: ', test_input[0])
 print('Objects: ', test_input[1])
 print('Taskplan(gt): ', test_input[2])
@@ -146,6 +148,7 @@ outputs, output_indices = model.network.forward(x1_padded,x2_padded,
                                                 x1_mask_padded,x2_mask_padded,
                                                 y=None)
 
-for index in output_indices[0]:
-    print(langs[2].itos[index.item()])
+
+output_txt = [langs[2].itos[index.item()] for index in output_indices[0]]
+print(' '.join(output_txt))
 

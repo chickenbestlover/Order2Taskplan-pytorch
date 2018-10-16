@@ -16,7 +16,7 @@ import pathlib
 from tools.plot import savePlot_hall, savePlot_hall1, savePlot_hall2
 print('PyTorch Version: ',torch.__version__)
 
-parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
+parser = argparse.ArgumentParser(description='command2taskplan-pytorch')
 parser.add_argument('--resume','-r',default=True,
                     help='use checkpoint model parameters as initial parameters (default: False)',
                     action="store_true")
@@ -172,8 +172,7 @@ try:
             log.info('[new best model saved.]')
 
         savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
-        savePlot_hall1(args,loss_trains, ppl_tests, exact_matches, f1_scores)
-        savePlot_hall2(args,loss_trains, ppl_tests, exact_matches, f1_scores)
+
 
 
 
