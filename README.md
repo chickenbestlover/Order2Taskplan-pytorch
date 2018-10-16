@@ -11,8 +11,8 @@ Please note that this repository contains only the implementation of the episodi
 
 ### Output
 * A robot behavior sequence(taskplan) with _n_ behaviors:
-  * subject<sub>1</sub> _verb_<sub>1</sub> object<sub>1</sub>  subject<sub>2</sub> _verb_<sub>2</sub> object<sub>2</sub> ... subject<sub>n</sub> _verb_<sub>n</sub> object<sub>n</sub>
-  * subject<sub>t</sub> = object<sub>t</sub> if _verb_<sub>t</sub> deals with only one object.
+  * _subject_<sub>1</sub> _verb_<sub>1</sub> _object_<sub>1</sub>  _subject_<sub>2</sub> _verb_<sub>2</sub> _object_<sub>2</sub> ... _subject_<sub>n</sub> _verb_<sub>n</sub> _object_<sub>n</sub>
+  * _subject_<sub>t</sub> = _object_<sub>t</sub> if _verb_<sub>t</sub> deals with only one object.
 
 ![concept](./fig/order2taskplan_concept.png)
 
