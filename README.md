@@ -84,5 +84,6 @@ Please cite the IROS 2018 paper if you use Order2Taskplan in your work:
 ## License
 
 The pre-trained models and the codes are released for uncommercial use.
+
 Please open an issue if you have questions.
 
