@@ -96,6 +96,29 @@ class seq2seq(nn.Module):
 
         return x1_hiddens
 
+    def forwardToHidden(self, y_in, y_in_mask, y_out):
+        """Inputs:
+        y_in = taskplan indices             [batch * len_o]
+        y_in_mask = taskplan mask        [batch * len_o]
+        """
+        # Embed both order and environment
+
+        y_in_emb = self.embedding(y_in) # [batch * len_o * embed_dim]
+        if self.args.dropout_emb > 0:
+            y_in_emb = nn.functional.dropout(y_in_emb, p=self.args.dropout_emb,
+                                               training=self.training)
+
+
+        y_in_hiddens = self.input1_rnn_encoder.forward(y_in_emb, y_in_mask) # [batch * len_o * hidden_size]
+        #print('y_in_hiddens:', y_in_hiddens.size())
+
+
+        rnn_outputs = self.rnn_decoder.forward(y_in_hiddens,y_in_mask,y_out,output_hidden=True)
+
+        return rnn_outputs
+
+
+
 class halluciation_net(nn.Module):
     def __init__(self, args, input_embedding, max_seqlen, padding_idx=0):
         super(halluciation_net,self).__init__()
