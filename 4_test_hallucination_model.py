@@ -99,7 +99,7 @@ for i,j in zip(pairs_maxlen['train'],pairs_maxlen['test']):
 
 if args.resume:
     log.info('[loading previous model...]')
-    checkpoint = torch.load('checkpoint/best_model/1_best_model.pt')
+    checkpoint = torch.load('checkpoint/best_model/2_best_model.pt')
     args = checkpoint['config']
     state_dict = checkpoint['state_dict']
     epoch_0 = checkpoint['epoch'] + 1
@@ -149,6 +149,5 @@ outputs, output_indices = model.network.forward_for_hall(x1_padded,x2_padded,
                                                 x1_mask_padded,x2_mask_padded,
                                                 y=y.unsqueeze(0),INPUT1_TYPE='hall')
 # HALLUCIANTION
-for index in output_indices[0]:
-    print(langs[2].itos[index.item()])
-
+output_txt = [langs[2].itos[index.item()] for index in output_indices[0]]
+print(' '.join(output_txt))

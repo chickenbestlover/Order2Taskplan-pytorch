@@ -121,7 +121,6 @@ else:
 
 
 
-Print()
 test_input = pairs['test'][3]
 print('Order: ', test_input[0])
 print('Objects: ', test_input[1])
