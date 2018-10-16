@@ -5,6 +5,19 @@ Please note that this repository contains only the implementation of the episodi
 
 ![concept](./fig/order2taskplan_concept.png)
 
+## Dataset
+* Total 50,000 input-output pairs (Train: 45,000, Test: 5,000)
+* Ten robot behaviors: _grasp_, _throw_, _locate_, _release_, _move_, _pour_, _put_, _push_, _sprinkle_, and _squeeze_
+* Every pair is related to one of these four scenarios:
+ 
+![scenarios](./fig/scenarios.png)
+
+* Example
+![dataset](./fig/dataset_example.png)
+
+
+
+
 
 ## Requirements
 * Ubuntu 16.04+ 
@@ -24,18 +37,13 @@ git clone https://github.com/chickenbestlover/Order2Taskplan-pytorch.git
 cd Order2Taskplan-pytorch; pip install -r requirements.txt
 ```
 
-## Download Pretrained Models
-* Order2Taskplan model
-
-
-
 ## Training
-* 1. Training Order2Taskplan model:
+* Step 1: Train Order2Taskplan model:
 ```
 CUDA_VISIBLE_DEVICES=0 python 1_train_order2taskplan_model.py
 ```
 
-* 2. Training Hallucination model(optional, required if you don't want the user command(order) input):
+* Step 2: Train Hallucination model(optional, required if you don't want the user command(order) input):
 ```
 CUDA_VISIBLE_DEVICES=0 python 2_train_hallucination_model.py 
 ``` 
@@ -55,3 +63,9 @@ Please cite the IROS 2018 paper if you use Order2Taskplan in your work:
   organization={IEEE}
 }
 ```
+
+## License
+
+The pre-trained models and the codes are released for uncommercial use.
+Please open an issue if you have questions.
+
