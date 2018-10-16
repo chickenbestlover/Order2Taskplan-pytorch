@@ -45,10 +45,13 @@ parser.add_argument('--dropout_rnn_output', default=0.2, type=float,
                     help='dropout rate of RNN output')
 parser.add_argument('--dropout_emb', default=0.2, type=float,
                     help='dropout rate of embedding layer')
+parser.add_argument('--latent_vector_size', default=0, type=float,
+                    help='latent vector size')
 parser.add_argument('--packing', default=False, type=bool,
                     help='packing padded rnn sequence')
 parser.add_argument('--teacher_forcing_ratio', default=0.5, type=float,
                     help='teacher forcing ratio in decoding process')
+
 parser.add_argument('--log_file', default='result/1_result.log',
                     help='log_file name to be saved')
 parser.add_argument('--plot_file', default='result/1_scores.pdf',

@@ -13,7 +13,7 @@ import time
 from shutil import copyfile
 import logging
 import pathlib
-from tools.plot import savePlot_hall
+from tools.plot import savePlot_hall, savePlot_hall1, savePlot_hall2
 print('PyTorch Version: ',torch.__version__)
 
 parser = argparse.ArgumentParser(description='order2taskplan-pytorch')
@@ -100,7 +100,7 @@ for i,j in zip(pairs_maxlen['train'],pairs_maxlen['test']):
 if args.resume:
     log.info('[loading previous model...]')
     checkpoint = torch.load('checkpoint/best_model/1_best_model.pt')
-    args = checkpoint['config']
+    #args = checkpoint['config']
     state_dict = checkpoint['state_dict']
     epoch_0 = checkpoint['epoch'] + 1
     model = order2taskplanModel(args=args, loader=loader,
@@ -118,7 +118,7 @@ try:
     best_val_score = 0.0
     loss_trains = []
     ppl_tests, exact_matches, f1_scores = {},{},{}
-    for type in ['normal','none','hall']:
+    for type in ['normal','normal+behavior','none','none+behavior','hall','hall+behavior']:
         ppl_tests[type] = []
         exact_matches[type] = []
         f1_scores[type] = []
@@ -126,10 +126,18 @@ try:
     for epoch in range(epoch_0,epoch_0 + args.epochs):
         start_time = time.time()
         loss = model.train_hall()
+
         if epoch==epoch_0:
-            ppl_test_normal, exact_match_normal, f1_score_normal = model.evaluate(INPUT1_TYPE="normal")
-            ppl_test_none, exact_match_none, f1_score_none = model.evaluate(INPUT1_TYPE="none")
-        ppl_test_hall, exact_match_hall, f1_score_hall = model.evaluate(INPUT1_TYPE="hall")
+            ppl_test_normal, exact_match_normal, f1_score_normal = model.evaluate(INPUT1_TYPE="normal",recursive_len=0)
+            ppl_test_normal_b, exact_match_normal_b, f1_score_normal_b = model.evaluate(INPUT1_TYPE="normal",recursive_len=6)
+
+            ppl_test_none, exact_match_none, f1_score_none = model.evaluate(INPUT1_TYPE="none",recursive_len=0)
+            ppl_test_none_b, exact_match_none_b, f1_score_none_b = model.evaluate(INPUT1_TYPE="none",recursive_len=6)
+
+
+        ppl_test_hall, exact_match_hall, f1_score_hall = model.evaluate(INPUT1_TYPE="hall",recursive_len=0)
+        ppl_test_hall_b, exact_match_hall_b, f1_score_hall_b = model.evaluate(INPUT1_TYPE="hall",recursive_len=6)
+
 
         elapsed_time = time.time() - start_time
         loss_trains.append(loss)
@@ -143,9 +151,18 @@ try:
         f1_scores['none'].append(f1_score_none)
         f1_scores['hall'].append(f1_score_hall)
 
+        ppl_tests['normal+behavior'].append(ppl_test_normal_b)
+        ppl_tests['none+behavior'].append(ppl_test_none_b)
+        ppl_tests['hall+behavior'].append(ppl_test_hall_b)
+        exact_matches['normal+behavior'].append(exact_match_normal_b)
+        exact_matches['none+behavior'].append(exact_match_none_b)
+        exact_matches['hall+behavior'].append(exact_match_hall_b)
+        f1_scores['normal+behavior'].append(f1_score_normal_b)
+        f1_scores['none+behavior'].append(f1_score_none_b)
+        f1_scores['hall+behavior'].append(f1_score_hall_b)
+
         log.info('|Epoch {:3d}| train MSE loss {:6.2f} | valid ppl {:6.2f}, F1 {:6.2f}, EM {:6.2f}| elapsed: {:3.0f} |'.format(
             epoch, loss, ppl_test_hall, f1_score_hall, exact_match_hall, elapsed_time))
-
 
         model.save(args.model_file,epoch)
         if f1_score_hall > best_val_score:
@@ -155,6 +172,8 @@ try:
             log.info('[new best model saved.]')
 
         savePlot_hall(args,loss_trains, ppl_tests, exact_matches, f1_scores)
+        savePlot_hall1(args,loss_trains, ppl_tests, exact_matches, f1_scores)
+        savePlot_hall2(args,loss_trains, ppl_tests, exact_matches, f1_scores)
 
 
 
