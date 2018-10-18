@@ -150,4 +150,4 @@ outputs, output_indices = model.network.forward_for_hall(x1_padded,x2_padded,
                                                 y=y.unsqueeze(0),INPUT1_TYPE='hall')
 # HALLUCIANTION
 output_txt = [langs[2].itos[index.item()] for index in output_indices[0]]
-print(' '.join(output_txt))
+print(' '.join(output_txt))n

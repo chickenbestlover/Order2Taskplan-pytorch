@@ -60,6 +60,8 @@ CUDA_VISIBLE_DEVICES=0 python 2_train_hallucination_model.py
 ``` 
 * We also provide pretrained models: [1_best_model.pt](https://drive.google.com/open?id=1ZD2qMtljhl2jYK1OxEPIk8Yo8zpsC9TJ), [2_best_model.pt](https://drive.google.com/open?id=1RtHr5ebhUu6psyYwGMEgpyxYrIEFbo5t)
 
+Download and place them to `checkpoint/best_model`
+
 ## Demo Video
 
 * This video was presented at IROS 2018.
